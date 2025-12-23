@@ -1,18 +1,18 @@
-// Clear old data on page load so new data starts fresh every time
+
 localStorage.removeItem("expenses");
 localStorage.removeItem("savingsGoal");
 
 let expenses = [];
 let savingsGoal = 0;
 
-// Load from localStorage (will be empty on fresh load)
+
 if(localStorage.getItem("expenses")) expenses = JSON.parse(localStorage.getItem("expenses"));
 if(localStorage.getItem("savingsGoal")) savingsGoal = JSON.parse(localStorage.getItem("savingsGoal"));
 
 const categoryLabels = ['Food','Shopping','Travel','Health','Entertainment','Bills','Others'];
 const categoryColors = ['#FFCDD2','#FFEB3B','#FF9800','#4DB6AC','#90CAF9','#D7CCC8','#B39DDB'];
 
-// Charts
+
 const categoryCtx = document.getElementById('categoryChart').getContext('2d');
 let categoryChart = new Chart(categoryCtx,{
     type:'bar',
@@ -27,21 +27,21 @@ let trendChart = new Chart(trendCtx, {
     options: { responsive: true, plugins: { title: { display: true, text: 'Spending Trend' } } }
 });
 
-// Toggle custom category input
+
 document.getElementById('expense-category').addEventListener('change', function () {
     document.getElementById("custom-category").style.display = this.value === "Others" ? "block" : "none";
 });
 
-// Set Goal button event listener
+
 document.getElementById('set-goal-btn').addEventListener('click', updateGoal);
 
-// Save to localStorage
+
 function saveData(){
     localStorage.setItem("expenses", JSON.stringify(expenses));
     localStorage.setItem("savingsGoal", JSON.stringify(savingsGoal));
 }
 
-// Add new expense
+
 function addExpense(){
     const title = document.getElementById("expense-title").value.trim();
     const amount = parseFloat(document.getElementById("expense-amount").value);
@@ -60,7 +60,7 @@ function addExpense(){
     updateUI();
     saveData();
 
-    // Clear inputs
+    
     document.getElementById("expense-title").value="";
     document.getElementById("expense-amount").value="";
     document.getElementById("custom-category").value="";
@@ -68,7 +68,7 @@ function addExpense(){
     document.getElementById("expense-time").value="";
 }
 
-// Set savings goal
+
 function updateGoal(){
     const goal = parseFloat(document.getElementById("savings-goal").value);
     if(isNaN(goal) || goal <= 0) {
@@ -80,7 +80,7 @@ function updateGoal(){
     saveData();
 }
 
-// Remove all expenses
+
 function resetExpenses(){
     if(!confirm("Are you sure you want to delete all expenses?")) return;
     expenses = [];
@@ -90,14 +90,14 @@ function resetExpenses(){
     updateUI();
 }
 
-// Delete single expense
+
 function deleteExpense(index){
     expenses.splice(index, 1);
     updateUI();
     saveData();
 }
 
-// Update UI
+
 function updateUI(){
     const total = expenses.reduce((s,e)=>s+e.amount,0);
     document.getElementById("total-spent").innerText = total.toFixed(2);
@@ -114,7 +114,7 @@ function updateUI(){
     document.getElementById("monthly-total").innerText = `Monthly: ₹${monthlyTotal.toFixed(2)}`;
     document.getElementById("yearly-total").innerText = `Yearly: ₹${yearlyTotal.toFixed(2)}`;
 
-    // Expense List with delete symbol
+    
     const list = document.getElementById("expense-list");
     list.innerHTML = "";
     expenses.sort((a,b)=>new Date(b.date)-new Date(a.date));
@@ -127,7 +127,7 @@ function updateUI(){
         list.appendChild(li);
     });
 
-    // Category chart
+    
     const totals = {};
     expenses.forEach(e=>totals[e.category]=(totals[e.category]||0)+e.amount);
 
@@ -142,10 +142,10 @@ function updateUI(){
     categoryChart.data.datasets[0].backgroundColor = colors;
     categoryChart.update();
 
-    // Trend chart
+    
     updateTrendChart(document.getElementById("trend-chart-select").value);
 
-    // Goal messages and progress bar
+    
     const goalMsgElem = document.getElementById("goal-msg");
     const goalRemainingElem = document.getElementById("goal-remaining");
     const goalProgressContainer = document.querySelector(".goal-progress-container");
@@ -167,7 +167,7 @@ function updateUI(){
     }
 }
 
-// Download CSV
+
 function downloadCSV(){
     if(expenses.length === 0) return alert("No expenses to export!");
     let csv = "Title,Amount,Category,Date & Time\n";
@@ -177,7 +177,7 @@ function downloadCSV(){
     const a = document.createElement("a"); a.href = url; a.download = "expenses.csv"; a.click(); URL.revokeObjectURL(url);
 }
 
-// Download PDF
+
 async function downloadPDF(){
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p','pt','a4');
@@ -201,7 +201,7 @@ async function downloadPDF(){
     pdf.save("BudgetTracker_Report.pdf");
 }
 
-// Update Category Chart Type
+
 function updateCategoryChartType(type){
     categoryChart.destroy();
     categoryChart = new Chart(categoryCtx,{
@@ -212,7 +212,7 @@ function updateCategoryChartType(type){
     updateUI();
 }
 
-// Update Trend Chart Data
+
 function updateTrendChart(option){
     let labels=[], data=[], colors=[];
     const today = new Date();
@@ -259,5 +259,5 @@ function updateTrendChart(option){
     });
 }
 
-// Initial UI
+
 updateUI();
