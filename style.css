@@ -1,30 +1,22 @@
-
 * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 body { background-color:#f4f4f9; color:#333; min-height:100vh; }
 
-
 .container { max-width:1200px; margin:20px auto; padding:20px; background:#fff; border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.1); }
 
-
 h1,h2 { margin-bottom:15px; color:#333; }
-
 
 input, select, button { padding:10px; margin:5px 0; width:100%; border-radius:6px; border:1px solid #ccc; font-size:1rem; }
 button { cursor:pointer; background-color:#FF9800; color:#fff; border:none; transition:0.3s; }
 button:hover { background-color:#fb8c00; }
 
-
 #auth-container { max-width:400px; margin:50px auto; }
 #auth-container h1 { text-align:center; margin-bottom:20px; }
 #login-form, #signup-form { display:flex; flex-direction:column; }
 
-
 .link-text { cursor:pointer; color:#D32F2F; font-weight:bold; }
-
 
 .profile-card { padding:20px; background:#fefefe; border-radius:10px; margin-bottom:20px; box-shadow:0 4px 15px rgba(0,0,0,0.05); }
 .profile-header { display:flex; align-items:center; gap:15px; margin-bottom:15px; }
-
 
 .profile-photo { width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid #FF9800; }
 .profile-photo-letter {
@@ -33,29 +25,23 @@ button:hover { background-color:#fb8c00; }
     color:white; background-size:400% 400%; animation: gradientMove 6s ease infinite;
 }
 
-
 @keyframes gradientMove {
     0% { background-position:0% 50%; }
     50% { background-position:100% 50%; }
     100% { background-position:0% 50%; }
 }
 
-
 .dashboard { margin-top:20px; }
 .dashboard table { width:100%; border-collapse:collapse; margin-bottom:20px; }
 .dashboard th, .dashboard td { text-align:left; padding:10px; border-bottom:1px solid #ddd; font-size:0.9rem; }
 
-
 .goal-progress-container { width:100%; background:#eee; height:15px; border-radius:10px; margin:10px 0; overflow:hidden; }
 #goal-progress-bar { height:100%; width:0%; background:#FF9800; border-radius:10px; transition:width 0.5s; }
-
 
 .icon-buttons { display:flex; justify-content:space-between; flex-wrap:wrap; gap:5%; }
 .icon-buttons button { width:48%; margin-top:10px; }
 
-
-canvas { width:100% !important; max-height:300px; margin-bottom:20px; }
-
+canvas { width:100% !important; max-height:400px; margin-bottom:20px; }
 
 @media (max-width: 768px) {
     .container { padding:15px; margin:10px; }
