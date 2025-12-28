@@ -1,66 +1,119 @@
-
-localStorage.removeItem("expenses");
-localStorage.removeItem("savingsGoal");
-
 let expenses = [];
 let savingsGoal = 0;
 
-
-if(localStorage.getItem("expenses")) expenses = JSON.parse(localStorage.getItem("expenses"));
-if(localStorage.getItem("savingsGoal")) savingsGoal = JSON.parse(localStorage.getItem("savingsGoal"));
-
-const categoryLabels = ['Food','Shopping','Travel','Health','Entertainment','Bills','Others'];
-const categoryColors = ['#FFCDD2','#FFEB3B','#FF9800','#4DB6AC','#90CAF9','#D7CCC8','#B39DDB'];
+const profileColors = [
+    ['#FF6B6B','#FFD93D'], ['#4ECDC4','#556270'], ['#C44D58','#FFA500'],
+    ['#6A0572','#00A8E8'], ['#F3FFBD','#FF9A8B'], ['#A1FFCE','#FAFFD1'],
+    ['#FF9A8B','#FF6A88'], ['#00F260','#0575E6'], ['#E1EEC3','#F05053'], ['#FFAFBD','#ffc3a0']
+];
 
 
 const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-let categoryChart = new Chart(categoryCtx,{
-    type:'bar',
-    data:{ labels: categoryLabels, datasets:[{ label:'Spending per Category', data:Array(categoryLabels.length).fill(0), backgroundColor: categoryColors }] },
-    options:{ responsive:true, plugins:{ legend:{display:false}, title:{display:true,text:'Expenses by Category'} }, scales:{ y:{ beginAtZero:true } } }
-});
+let categoryChart = new Chart(categoryCtx, { type:'bar', data:{ labels: [], datasets:[{ label:'Spending', data:[], backgroundColor:[] }] }, options:{ responsive:true } });
 
 const trendCtx = document.getElementById('trendChart').getContext('2d');
-let trendChart = new Chart(trendCtx, {
-    type: 'bar',
-    data: { labels: [], datasets: [{ label: 'Spending', data: [], backgroundColor: [] }] },
-    options: { responsive: true, plugins: { title: { display: true, text: 'Spending Trend' } } }
-});
+let trendChart = new Chart(trendCtx, { type:'bar', data:{ labels:[], datasets:[{ label:'Spending', data:[], backgroundColor:[] }] }, options:{ responsive:true } });
 
 
-document.getElementById('expense-category').addEventListener('change', function () {
-    document.getElementById("custom-category").style.display = this.value === "Others" ? "block" : "none";
-});
+function showSignup() { document.getElementById("login-form").style.display="none"; document.getElementById("signup-form").style.display="block"; }
+function showLogin() { document.getElementById("signup-form").style.display="none"; document.getElementById("login-form").style.display="block"; }
+
+function signup(){
+    const username = document.getElementById("signup-username").value.trim();
+    const password = document.getElementById("signup-password").value.trim();
+    const email = document.getElementById("signup-email").value.trim();
+    if(!username||!password||!email){ alert("Enter valid details"); return; }
+    let users = JSON.parse(localStorage.getItem("users"))||{};
+    if(users[username]){ alert("Username exists"); return; }
+    users[username] = { password, email, expenses: [], savingsGoal:0 };
+    localStorage.setItem("users", JSON.stringify(users));
+    alert("Account created! Login.");
+    showLogin();
+}
+
+function login(){
+    const username = document.getElementById("login-username").value.trim();
+    const password = document.getElementById("login-password").value.trim();
+    let users = JSON.parse(localStorage.getItem("users"))||{};
+    if(users[username] && users[username].password===password){
+        localStorage.setItem("currentUser", username);
+        loadUserData();
+        document.getElementById("auth-container").style.display="none";
+        document.getElementById("app-container").style.display="block";
+    } else alert("Invalid credentials");
+}
+
+function logout(){
+    localStorage.removeItem("currentUser");
+    document.getElementById("app-container").style.display="none";
+    document.getElementById("auth-container").style.display="block";
+}
 
 
-document.getElementById('set-goal-btn').addEventListener('click', updateGoal);
+function getRandomGradient(){
+    const rand = profileColors[Math.floor(Math.random()*profileColors.length)];
+    return `linear-gradient(135deg, ${rand[0]}, ${rand[1]}, ${rand[0]}, ${rand[1]})`;
+}
+
+
+function loadUserData(){
+    const username = localStorage.getItem("currentUser");
+    const users = JSON.parse(localStorage.getItem("users"));
+    if(!username||!users[username]) return;
+
+    expenses = users[username].expenses||[];
+    savingsGoal = users[username].savingsGoal||0;
+
+    document.getElementById("profile-username").innerText = username;
+    document.getElementById("profile-email").innerText = users[username].email||'';
+
+    const photoContainer = document.getElementById("profile-photo");
+    const letterDiv = document.getElementById("profile-photo-letter");
+
+    if(users[username].photo){
+        photoContainer.src = users[username].photo;
+        photoContainer.style.display="block";
+        letterDiv.style.display="none";
+    } else {
+        photoContainer.style.display="none";
+        letterDiv.style.display="flex";
+        letterDiv.innerText = username.charAt(0).toUpperCase();
+        letterDiv.style.background = getRandomGradient();
+    }
+
+    updateUI();
+}
 
 
 function saveData(){
-    localStorage.setItem("expenses", JSON.stringify(expenses));
-    localStorage.setItem("savingsGoal", JSON.stringify(savingsGoal));
+    const username = localStorage.getItem("currentUser");
+    if(username){
+        let users = JSON.parse(localStorage.getItem("users"));
+        users[username].expenses = expenses;
+        users[username].savingsGoal = savingsGoal;
+        localStorage.setItem("users", JSON.stringify(users));
+    }
 }
 
+
+document.getElementById('expense-category').addEventListener('change', function(){
+    document.getElementById("custom-category").style.display = this.value==="Others"?"block":"none";
+});
+document.getElementById('set-goal-btn').addEventListener('click', updateGoal);
 
 function addExpense(){
     const title = document.getElementById("expense-title").value.trim();
     const amount = parseFloat(document.getElementById("expense-amount").value);
     let category = document.getElementById("expense-category").value;
     if(category==="Others" && document.getElementById("custom-category").value.trim()!=="") category=document.getElementById("custom-category").value.trim();
-
     const dateVal = document.getElementById("expense-date").value;
     const timeVal = document.getElementById("expense-time").value;
-
-    if(!title || isNaN(amount) || amount <= 0 || !dateVal || !timeVal){
-        alert("Please enter valid expense details.");
-        return;
-    }
+    if(!title||isNaN(amount)||amount<=0||!dateVal||!timeVal){ alert("Enter valid details"); return; }
 
     expenses.push({title, amount, category, date:new Date(`${dateVal}T${timeVal}`).toISOString()});
-    updateUI();
     saveData();
+    updateUI();
 
-    
     document.getElementById("expense-title").value="";
     document.getElementById("expense-amount").value="";
     document.getElementById("custom-category").value="";
@@ -68,196 +121,104 @@ function addExpense(){
     document.getElementById("expense-time").value="";
 }
 
-
 function updateGoal(){
     const goal = parseFloat(document.getElementById("savings-goal").value);
-    if(isNaN(goal) || goal <= 0) {
-        alert("Enter a valid savings goal.");
-        return;
-    }
+    if(isNaN(goal)||goal<=0){ alert("Enter valid goal"); return; }
     savingsGoal = goal;
-    updateUI();
     saveData();
-}
-
-
-function resetExpenses(){
-    if(!confirm("Are you sure you want to delete all expenses?")) return;
-    expenses = [];
-    savingsGoal = 0;
-    localStorage.removeItem("expenses");
-    localStorage.removeItem("savingsGoal");
     updateUI();
 }
 
-
-function deleteExpense(index){
-    expenses.splice(index, 1);
-    updateUI();
-    saveData();
-}
+function resetExpenses(){ if(!confirm("Delete all expenses?")) return; expenses=[]; savingsGoal=0; saveData(); updateUI(); }
+function deleteExpense(index){ expenses.splice(index,1); saveData(); updateUI(); }
 
 
 function updateUI(){
     const total = expenses.reduce((s,e)=>s+e.amount,0);
     document.getElementById("total-spent").innerText = total.toFixed(2);
 
-    const today = new Date();
-    const dailyTotal = expenses.filter(e=>new Date(e.date).toDateString()===today.toDateString()).reduce((s,e)=>s+e.amount,0);
-    const monthlyTotal = expenses.filter(e=>{
-        const d=new Date(e.date); 
-        return d.getMonth()===today.getMonth() && d.getFullYear()===today.getFullYear();
-    }).reduce((s,e)=>s+e.amount,0);
-    const yearlyTotal = expenses.filter(e=>new Date(e.date).getFullYear()===today.getFullYear()).reduce((s,e)=>s+e.amount,0);
-
-    document.getElementById("daily-total").innerText = `Daily: ₹${dailyTotal.toFixed(2)}`;
-    document.getElementById("monthly-total").innerText = `Monthly: ₹${monthlyTotal.toFixed(2)}`;
-    document.getElementById("yearly-total").innerText = `Yearly: ₹${yearlyTotal.toFixed(2)}`;
-
     
-    const list = document.getElementById("expense-list");
-    list.innerHTML = "";
+    const tbody = document.querySelector("#expense-table tbody");
+    tbody.innerHTML="";
     expenses.sort((a,b)=>new Date(b.date)-new Date(a.date));
     expenses.forEach((e,i)=>{
-        const li = document.createElement("li");
         const d = new Date(e.date);
-        if(d.toDateString() === today.toDateString()) li.classList.add("today-expense");
-        li.innerHTML = `<strong>${e.title}</strong> - ₹${e.amount.toFixed(2)} (${e.category}) <br><small>${d.toLocaleString()}</small>
-        <span style="cursor:pointer;color:#D32F2F; font-weight:bold; margin-left:10px;" title="Delete expense" onclick="deleteExpense(${i})">❌</span>`;
-        list.appendChild(li);
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${e.title}</td><td>₹${e.amount.toFixed(2)}</td><td>${e.category}</td><td>${d.toLocaleString()}</td><td><span onclick="deleteExpense(${i})" class="link-text">❌</span></td>`;
+        tbody.appendChild(tr);
     });
+
+    
+    const goalMsg = document.getElementById("goal-msg");
+    const goalRemaining = document.getElementById("goal-remaining");
+    const progressContainer = document.querySelector(".goal-progress-container");
+    const progressBar = document.getElementById("goal-progress-bar");
+    if(savingsGoal>0){
+        const diff = savingsGoal-total;
+        goalMsg.innerText = `Savings Goal: ₹${savingsGoal.toFixed(2)}`;
+        goalRemaining.innerText = diff>=0?`Remaining: ₹${diff.toFixed(2)}`:`Exceeded by ₹${(-diff).toFixed(2)}`;
+        progressContainer.style.display="block";
+        progressBar.style.width = Math.min(Math.max((total/savingsGoal)*100,0),100)+"%";
+    } else { goalMsg.innerText=""; goalRemaining.innerText=""; progressContainer.style.display="none"; progressBar.style.width="0%"; }
+
+    
+    document.getElementById("profile-total-spent").innerText = total.toFixed(2);
+    const today = new Date();
+    const startDate = expenses.length ? new Date(Math.min(...expenses.map(e=>new Date(e.date)))) : today;
+    const daysUsed = Math.max(1, Math.floor((today-startDate)/(1000*60*60*24))+1);
+    const monthsUsed = Math.max(1, today.getMonth() - startDate.getMonth() +1);
+    document.getElementById("profile-daily-avg").innerText = (total/daysUsed).toFixed(2);
+    document.getElementById("profile-monthly-avg").innerText = (total/monthsUsed).toFixed(2);
+    document.getElementById("profile-goal").innerText = savingsGoal.toFixed(2);
 
     
     const totals = {};
     expenses.forEach(e=>totals[e.category]=(totals[e.category]||0)+e.amount);
-
-    let uniqueCategories = Array.from(new Set(expenses.map(e=>e.category)));
-    if(uniqueCategories.length === 0) uniqueCategories = categoryLabels;
-
-    const colorPalette = ['#FFCDD2','#FFEB3B','#FF9800','#4DB6AC','#90CAF9','#D7CCC8','#B39DDB','#F48FB1','#CE93D8','#81D4FA','#A5D6A7','#FFE082'];
-    const colors = uniqueCategories.map((_,i) => colorPalette[i % colorPalette.length]);
-
-    categoryChart.data.labels = uniqueCategories;
-    categoryChart.data.datasets[0].data = uniqueCategories.map(c=>totals[c]||0);
-    categoryChart.data.datasets[0].backgroundColor = colors;
+    const categories = Object.keys(totals);
+    const data = categories.map(c=>totals[c]);
+    const colors = ['#FFCDD2','#FFEB3B','#FF9800','#4DB6AC','#90CAF9','#D7CCC8','#B39DDB','#F48FB1','#CE93D8','#81D4FA','#A5D6A7','#FFE082'];
+    categoryChart.data.labels = categories;
+    categoryChart.data.datasets[0].data = data;
+    categoryChart.data.datasets[0].backgroundColor = colors.slice(0,categories.length);
     categoryChart.update();
 
     
-    updateTrendChart(document.getElementById("trend-chart-select").value);
-
-    
-    const goalMsgElem = document.getElementById("goal-msg");
-    const goalRemainingElem = document.getElementById("goal-remaining");
-    const goalProgressContainer = document.querySelector(".goal-progress-container");
-    const goalProgressBar = document.getElementById("goal-progress-bar");
-
-    if(savingsGoal > 0){
-        const remaining = savingsGoal - total;
-        goalMsgElem.innerText = `Savings Goal: ₹${savingsGoal.toFixed(2)}`;
-        goalRemainingElem.innerText = remaining >= 0 ? `Remaining: ₹${remaining.toFixed(2)}` : `Exceeded by ₹${(-remaining).toFixed(2)}`;
-        goalProgressContainer.style.display = "block";
-
-        const progressPercent = Math.min(Math.max((total / savingsGoal) * 100, 0), 100);
-        goalProgressBar.style.width = progressPercent + "%";
-    } else {
-        goalMsgElem.innerText="";
-        goalRemainingElem.innerText="";
-        goalProgressContainer.style.display = "none";
-        goalProgressBar.style.width = "0%";
-    }
+    const trendData = {};
+    expenses.forEach(e=>{
+        const d = new Date(e.date);
+        const key = d.toLocaleDateString();
+        trendData[key] = (trendData[key]||0)+e.amount;
+    });
+    trendChart.data.labels = Object.keys(trendData);
+    trendChart.data.datasets[0].data = Object.values(trendData);
+    trendChart.data.datasets[0].backgroundColor = colors[0];
+    trendChart.update();
 }
 
 
 function downloadCSV(){
-    if(expenses.length === 0) return alert("No expenses to export!");
-    let csv = "Title,Amount,Category,Date & Time\n";
-    expenses.forEach(e=>csv+=`"${e.title}",${e.amount},"${e.category}","${new Date(e.date).toLocaleString()}"\n`);
-    const blob = new Blob([csv], {type: "text/csv"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = "expenses.csv"; a.click(); URL.revokeObjectURL(url);
+    if(expenses.length===0){ alert("No expenses"); return; }
+    let csv = "Title,Amount,Category,Date\n";
+    expenses.forEach(e=>{ csv+=`${e.title},${e.amount},${e.category},${new Date(e.date).toLocaleString()}\n`; });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download="expenses.csv";
+    a.click();
 }
 
-
-async function downloadPDF(){
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF('p','pt','a4');
-    let y=40;
-    pdf.setFontSize(20); pdf.text("💼 Budget Tracker Report", 210, y, {align:"center"}); y+=30;
-    pdf.setFontSize(12); pdf.text(`Generated on: ${new Date().toLocaleString()}`, 40, y); y+=20;
-
-    const totalSpent = expenses.reduce((s,e)=>s+e.amount,0);
-    pdf.setFontSize(14); pdf.text(`Total Spent: ₹${totalSpent.toFixed(2)}`, 40, y); y+=20;
-    if(savingsGoal>0){ 
-        const remaining= savingsGoal-totalSpent; 
-        pdf.text(`Savings Goal: ₹${savingsGoal.toFixed(2)}`,40,y); y+=15; 
-        pdf.text(remaining>=0?`Remaining: ₹${remaining.toFixed(2)}`:`Exceeded by ₹${(-remaining).toFixed(2)}`,40,y); y+=20; 
-    }
-
-    const catImg = document.getElementById('categoryChart').toDataURL('image/png',1.0);
-    const trendImg = document.getElementById('trendChart').toDataURL('image/png',1.0);
-    pdf.addImage(catImg,'PNG',40,y,500,200); y+=210;
-    pdf.addImage(trendImg,'PNG',40,y,500,200); y+=210;
-
-    pdf.save("BudgetTracker_Report.pdf");
-}
-
-
-function updateCategoryChartType(type){
-    categoryChart.destroy();
-    categoryChart = new Chart(categoryCtx,{
-        type: type,
-        data:{ labels: categoryLabels, datasets:[{ label:'Spending per Category', data:Array(categoryLabels.length).fill(0), backgroundColor: categoryColors }] },
-        options:{ responsive:true, plugins:{ legend:{display:false}, title:{display:true,text:'Expenses by Category'} }, scales:{ y:{ beginAtZero:true } } }
-    });
-    updateUI();
-}
-
-
-function updateTrendChart(option){
-    let labels=[], data=[], colors=[];
-    const today = new Date();
-
-    if(option==='daily'){
-        for(let i=29;i>=0;i--){
-            const d = new Date(); d.setDate(d.getDate()-i);
-            labels.push(d.toLocaleDateString());
-            const total = expenses.filter(e=>new Date(e.date).toDateString()===d.toDateString()).reduce((s,e)=>s+e.amount,0);
-            data.push(total);
-            colors.push(d.toDateString()===today.toDateString()?'#FF5722':'#FFCDD2');
-        }
-    } else if(option==='monthly'){
-        for(let i=0;i<12;i++){
-            const total = expenses.filter(e=>{const d=new Date(e.date); return d.getMonth()===i && d.getFullYear()===today.getFullYear();}).reduce((s,e)=>s+e.amount,0);
-            labels.push(new Date(today.getFullYear(),i).toLocaleString('default',{month:'short'}));
-            data.push(total);
-            colors.push('#90CAF9');
-        }
-    } else if(option==='quarterly'){
-        for(let i=0;i<4;i++){
-            const qStart = new Date(today.getFullYear(), i*3, 1);
-            const qEnd = new Date(today.getFullYear(), i*3+3, 0);
-            const total = expenses.filter(e=>{const d=new Date(e.date); return d>=qStart && d<=qEnd;}).reduce((s,e)=>s+e.amount,0);
-            labels.push(`Q${i+1}`);
-            data.push(total);
-            colors.push('#4DB6AC');
-        }
-    } else if(option==='yearly'){
-        const years = [...new Set(expenses.map(e=>new Date(e.date).getFullYear()))].sort();
-        years.forEach(y=>{
-            const total = expenses.filter(e=>new Date(e.date).getFullYear()===y).reduce((s,e)=>s+e.amount,0);
-            labels.push(y);
-            data.push(total);
-            colors.push('#D7CCC8');
-        });
-    }
-
-    trendChart.destroy();
-    trendChart = new Chart(trendCtx,{
-        type:'bar',
-        data:{ labels, datasets:[{ label:'Spending', data, backgroundColor: colors }] },
-        options:{ responsive:true, plugins:{ title:{display:true,text:`Spending Trend (${option})`} } }
+function downloadPDF(){
+    html2canvas(document.querySelector('.dashboard')).then(canvas=>{
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jspdf.jsPDF();
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth)/imgProps.width;
+        pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+        pdf.save("expenses.pdf");
     });
 }
 
 
-updateUI();
+function updateCategoryChartType(type){ categoryChart.config.type=type; categoryChart.update(); }
+function updateTrendChart(type){  }
