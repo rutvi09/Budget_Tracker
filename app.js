@@ -1,14 +1,9 @@
-// ========================
-// Global Variables
-// ========================
+
 let expenses = [];
 let currentUser = null;
 let categoryChart = null;
 let trendChart = null;
 
-// ========================
-// Auth Functions
-// ========================
 function showSignup() {
     document.getElementById('login-form').style.display = 'none';
     document.getElementById('signup-form').style.display = 'block';
@@ -66,9 +61,6 @@ function logout() {
     if (trendChart) trendChart.destroy();
 }
 
-// ========================
-// Profile Functions
-// ========================
 function loadProfile() {
     const user = JSON.parse(localStorage.getItem('users'))[currentUser];
     document.getElementById('profile-username').textContent = currentUser;
@@ -94,9 +86,6 @@ function updateProfileStats() {
     document.getElementById('profile-goal').textContent = goal.toFixed(2);
 }
 
-// ========================
-// Expense Functions
-// ========================
 function addExpense() {
     const title = document.getElementById('expense-title').value;
     const amount = Number(document.getElementById('expense-amount').value);
@@ -142,9 +131,6 @@ function resetExpenses() {
     renderTrendChart();
 }
 
-// ========================
-// Render Functions
-// ========================
 function renderExpenses() {
     const tbody = document.querySelector('#expense-table tbody');
     tbody.innerHTML = '';
@@ -173,9 +159,6 @@ function deleteExpense(index) {
     renderTrendChart();
 }
 
-// ========================
-// Savings Goal Functions
-// ========================
 document.getElementById('set-goal-btn').addEventListener('click', () => {
     const goal = Number(document.getElementById('savings-goal').value);
     if (!goal) return;
@@ -188,9 +171,6 @@ document.getElementById('set-goal-btn').addEventListener('click', () => {
     document.getElementById('goal-progress-bar').style.width = progress + '%';
 });
 
-// ========================
-// Category Custom Input
-// ========================
 const categorySelect = document.getElementById('expense-category');
 const customCategoryInput = document.getElementById('custom-category');
 
@@ -203,9 +183,6 @@ categorySelect.addEventListener('change', () => {
     }
 });
 
-// ========================
-// Category Chart
-// ========================
 function renderCategoryChart(type = 'bar') {
     const ctx = document.getElementById('categoryChart').getContext('2d');
     const categoryMap = {};
@@ -233,9 +210,6 @@ function updateCategoryChartType(type) {
     renderCategoryChart(type);
 }
 
-// ========================
-// Spending Trends Chart (always bar, visible, formatted)
-// ========================
 function renderTrendChart() {
     const period = document.getElementById('trend-period-select').value;
     const ctx = document.getElementById('trendChart').getContext('2d');
@@ -282,7 +256,7 @@ function renderTrendChart() {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false, // ensures chart fills canvas height
+            maintainAspectRatio: false, 
             plugins: { legend: { display: true } },
             scales: {
                 y: { beginAtZero: true },
@@ -294,9 +268,6 @@ function renderTrendChart() {
 
 document.getElementById('trend-period-select').addEventListener('change', renderTrendChart);
 
-// ========================
-// Export Functions
-// ========================
 function downloadCSV() {
     let csv = 'Title,Amount,Category,Date,Time\n';
     expenses.forEach(exp => {
