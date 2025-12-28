@@ -1,8 +1,8 @@
-
 let expenses = [];
 let currentUser = null;
 let categoryChart = null;
 let trendChart = null;
+
 
 function showSignup() {
     document.getElementById('login-form').style.display = 'none';
@@ -14,10 +14,11 @@ function showLogin() {
     document.getElementById('login-form').style.display = 'block';
 }
 
+
 function signup() {
-    const username = document.getElementById('signup-username').value;
-    const email = document.getElementById('signup-email').value;
-    const password = document.getElementById('signup-password').value;
+    const username = document.getElementById('signup-username').value.trim();
+    const email = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('signup-password').value.trim();
 
     if (!username || !email || !password) {
         alert('Please fill all fields!');
@@ -36,9 +37,10 @@ function signup() {
     showLogin();
 }
 
+
 function login() {
-    const username = document.getElementById('login-username').value;
-    const password = document.getElementById('login-password').value;
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value.trim();
 
     const users = JSON.parse(localStorage.getItem('users') || '{}');
     if (users[username] && users[username].password === password) {
@@ -52,6 +54,7 @@ function login() {
     }
 }
 
+
 function logout() {
     currentUser = null;
     document.getElementById('app-container').style.display = 'none';
@@ -61,12 +64,22 @@ function logout() {
     if (trendChart) trendChart.destroy();
 }
 
+
 function loadProfile() {
     const user = JSON.parse(localStorage.getItem('users'))[currentUser];
     document.getElementById('profile-username').textContent = currentUser;
     document.getElementById('profile-email').textContent = user.email;
+
+    
+    const letterDiv = document.getElementById('profile-photo-letter');
+    letterDiv.textContent = currentUser.charAt(0).toUpperCase();
+    letterDiv.style.background = `linear-gradient(135deg, #FF9800, #FF5722, #FFC107, #FF7043)`;
+    letterDiv.style.backgroundSize = '400% 400%';
+    letterDiv.style.animation = 'gradientMove 6s ease infinite';
+
     updateProfileStats();
 }
+
 
 function updateProfileStats() {
     const totalSpent = expenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
@@ -86,11 +99,12 @@ function updateProfileStats() {
     document.getElementById('profile-goal').textContent = goal.toFixed(2);
 }
 
+
 function addExpense() {
-    const title = document.getElementById('expense-title').value;
+    const title = document.getElementById('expense-title').value.trim();
     const amount = Number(document.getElementById('expense-amount').value);
     let category = document.getElementById('expense-category').value;
-    const customCategory = document.getElementById('custom-category').value;
+    const customCategory = document.getElementById('custom-category').value.trim();
     const date = document.getElementById('expense-date').value;
     const time = document.getElementById('expense-time').value;
 
@@ -110,6 +124,7 @@ function addExpense() {
     renderTrendChart();
 }
 
+
 function saveExpenses() {
     localStorage.setItem(currentUser + '_expenses', JSON.stringify(expenses));
 }
@@ -121,6 +136,7 @@ function loadExpenses() {
     renderTrendChart();
 }
 
+
 function resetExpenses() {
     if (!confirm('Are you sure you want to reset all expenses?')) return;
     expenses = [];
@@ -130,6 +146,7 @@ function resetExpenses() {
     renderCategoryChart();
     renderTrendChart();
 }
+
 
 function renderExpenses() {
     const tbody = document.querySelector('#expense-table tbody');
@@ -145,7 +162,6 @@ function renderExpenses() {
         `;
         tbody.appendChild(tr);
     });
-
     const total = expenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
     document.getElementById('total-spent').textContent = total.toFixed(2);
 }
@@ -173,7 +189,6 @@ document.getElementById('set-goal-btn').addEventListener('click', () => {
 
 const categorySelect = document.getElementById('expense-category');
 const customCategoryInput = document.getElementById('custom-category');
-
 categorySelect.addEventListener('change', () => {
     if (categorySelect.value === 'Others') {
         customCategoryInput.style.display = 'block';
@@ -183,13 +198,11 @@ categorySelect.addEventListener('change', () => {
     }
 });
 
+
 function renderCategoryChart(type = 'bar') {
     const ctx = document.getElementById('categoryChart').getContext('2d');
     const categoryMap = {};
-    expenses.forEach(exp => {
-        categoryMap[exp.category] = (categoryMap[exp.category] || 0) + Number(exp.amount);
-    });
-
+    expenses.forEach(exp => categoryMap[exp.category] = (categoryMap[exp.category] || 0) + Number(exp.amount));
     if (categoryChart) categoryChart.destroy();
     categoryChart = new Chart(ctx, {
         type: type,
@@ -198,97 +211,60 @@ function renderCategoryChart(type = 'bar') {
             datasets: [{
                 label: 'Expenses',
                 data: Object.values(categoryMap),
-                backgroundColor: [
-                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF'
-                ]
+                backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40','#C9CBCF']
             }]
         }
     });
 }
 
-function updateCategoryChartType(type) {
-    renderCategoryChart(type);
-}
+function updateCategoryChartType(type) { renderCategoryChart(type); }
 
 function renderTrendChart() {
     const period = document.getElementById('trend-period-select').value;
     const ctx = document.getElementById('trendChart').getContext('2d');
-
     const trendMap = {};
 
     expenses.forEach(exp => {
         const date = new Date(exp.date);
         let key;
-        if (period === 'daily') key = exp.date;
-        else if (period === 'monthly') key = `${date.getFullYear()}-${date.getMonth() + 1}`;
+        if (period === 'daily') key = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`;
+        else if (period === 'monthly') key = `${date.getFullYear()}-${date.getMonth()+1}`;
         else key = `${date.getFullYear()}`;
         trendMap[key] = (trendMap[key] || 0) + Number(exp.amount);
     });
 
-    const sortedKeys = Object.keys(trendMap).sort((a, b) => new Date(a) - new Date(b));
-
-    const labels = sortedKeys.map(key => {
-        const parts = key.split('-');
-        if (period === 'daily') {
-            const date = new Date(key);
-            return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
-        } else if (period === 'monthly') {
-            const month = parseInt(parts[1], 10) - 1;
-            const year = parts[0];
-            return new Date(year, month).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
-        } else {
-            return key;
-        }
-    });
-
-    const data = sortedKeys.map(key => trendMap[key]);
+    const labels = Object.keys(trendMap).sort();
+    const data = labels.map(l => trendMap[l]);
 
     if (trendChart) trendChart.destroy();
     trendChart = new Chart(ctx, {
         type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Spending',
-                data: data,
-                backgroundColor: '#36A2EB'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false, 
-            plugins: { legend: { display: true } },
-            scales: {
-                y: { beginAtZero: true },
-                x: { ticks: { autoSkip: false, maxRotation: 45, minRotation: 0 } }
-            }
-        }
+        data: { labels: labels, datasets: [{ label: 'Spending', data: data, backgroundColor: '#FF9800' }] },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
     });
 }
 
 document.getElementById('trend-period-select').addEventListener('change', renderTrendChart);
 
+
 function downloadCSV() {
     let csv = 'Title,Amount,Category,Date,Time\n';
-    expenses.forEach(exp => {
-        csv += `${exp.title},${exp.amount},${exp.category},${exp.date},${exp.time}\n`;
-    });
-
+    expenses.forEach(exp => csv += `${exp.title},${exp.amount},${exp.category},${exp.date},${exp.time}\n`);
     const blob = new Blob([csv], { type: 'text/csv' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'expenses.csv';
-    a.click();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'expenses.csv'; a.click(); URL.revokeObjectURL(url);
 }
 
-function downloadPDF() {
-    html2canvas(document.querySelector('.dashboard')).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jspdf.jsPDF();
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save('expenses.pdf');
-    });
+
+async function downloadPDF() {
+    const appContainer = document.getElementById('app-container');
+    const canvas = await html2canvas(appContainer);
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p','mm','a4');
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = 210;
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+    pdf.save('expenses.pdf');
 }
