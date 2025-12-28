@@ -11,120 +11,113 @@
 </head>
 <body>
 
-
 <div id="auth-container" class="container">
-  <h1>💼 Budget Tracker</h1>
+    <h1>💼 Budget Tracker</h1>
 
-  <div id="login-form">
-    <h2>Login</h2>
-    <input type="text" id="login-username" placeholder="Username">
-    <input type="password" id="login-password" placeholder="Password">
-    <button onclick="login()">Login</button>
-    <p>Don't have an account? <span onclick="showSignup()" class="link-text">Sign Up</span></p>
-  </div>
+    <div id="login-form">
+        <h2>Login</h2>
+        <input type="text" id="login-username" placeholder="Username">
+        <input type="password" id="login-password" placeholder="Password">
+        <button onclick="login()">Login</button>
+        <p>Don't have an account? <span onclick="showSignup()" class="link-text">Sign Up</span></p>
+    </div>
 
-  <div id="signup-form" style="display:none;">
-    <h2>Sign Up</h2>
-    <input type="text" id="signup-username" placeholder="Username">
-    <input type="email" id="signup-email" placeholder="Email">
-    <input type="password" id="signup-password" placeholder="Password">
-    <button onclick="signup()">Sign Up</button>
-    <p>Already have an account? <span onclick="showLogin()" class="link-text">Login</span></p>
-  </div>
+    <div id="signup-form" style="display:none;">
+        <h2>Sign Up</h2>
+        <input type="text" id="signup-username" placeholder="Username">
+        <input type="email" id="signup-email" placeholder="Email">
+        <input type="password" id="signup-password" placeholder="Password">
+        <button onclick="signup()">Sign Up</button>
+        <p>Already have an account? <span onclick="showLogin()" class="link-text">Login</span></p>
+    </div>
 </div>
 
-
 <div id="app-container" class="container" style="display:none;">
-
-
-  <div id="profile-summary" class="profile-card">
-    <div class="profile-header">
-      <img id="profile-photo" src="" alt="Profile Photo" class="profile-photo" style="display:none;">
-      <div id="profile-photo-letter" class="profile-photo-letter"></div>
-      <div>
-        <h2 id="profile-username">User</h2>
-        <p id="profile-email"></p>
-      </div>
-    </div>
-    <p>Total Spent: ₹ <span id="profile-total-spent">0.00</span></p>
-    <p>Average Daily: ₹ <span id="profile-daily-avg">0.00</span></p>
-    <p>Average Monthly: ₹ <span id="profile-monthly-avg">0.00</span></p>
-    <p>Average Yearly: ₹ <span id="profile-yearly-avg">0.00</span></p>
-    <p>Savings Goal: ₹ <span id="profile-goal">0.00</span></p>
-    <button onclick="logout()" class="logout-btn">Logout</button>
-  </div>
-
-  
-  <div class="form">
-    <h2>Add Expense</h2>
-    <input type="text" id="expense-title" placeholder="Expense title">
-    <input type="number" id="expense-amount" placeholder="Amount">
-    <select id="expense-category">
-      <option value="Food">Food</option>
-      <option value="Shopping">Shopping</option>
-      <option value="Travel">Travel</option>
-      <option value="Health">Health</option>
-      <option value="Entertainment">Entertainment</option>
-      <option value="Bills">Bills</option>
-      <option value="Others">Others</option>
-    </select>
-    <input type="text" id="custom-category" placeholder="Enter custom category" style="display:none;">
-    <label>Date:</label>
-    <input type="date" id="expense-date">
-    <label>Time:</label>
-    <input type="time" id="expense-time">
-
-    <div class="icon-buttons">
-      <button onclick="addExpense()">Add Expense</button>
-      <button onclick="downloadCSV()">Export CSV</button>
-      <button onclick="downloadPDF()">Export PDF</button>
-      <button onclick="resetExpenses()">Reset All</button>
-    </div>
-  </div>
-
-  <!-- Summary Table & Charts -->
-  <div class="dashboard">
-    <h2>Total Spent: ₹ <span id="total-spent">0</span></h2>
-
-    <h2>Set Savings Goal:</h2>
-    <input type="number" id="savings-goal" placeholder="Enter goal amount">
-    <button id="set-goal-btn">Set Goal</button>
-    <p id="goal-msg"></p>
-    <p id="goal-remaining"></p>
-    <div class="goal-progress-container">
-      <div id="goal-progress-bar"></div>
+    <div id="profile-summary" class="profile-card">
+        <div class="profile-header">
+            <div id="profile-photo-letter" class="profile-photo-letter"></div>
+            <div>
+                <h2 id="profile-username">User</h2>
+                <p id="profile-email"></p>
+            </div>
+        </div>
+        <p>Total Spent: ₹ <span id="profile-total-spent">0.00</span></p>
+        <p>Average Daily: ₹ <span id="profile-daily-avg">0.00</span></p>
+        <p>Average Monthly: ₹ <span id="profile-monthly-avg">0.00</span></p>
+        <p>Average Yearly: ₹ <span id="profile-yearly-avg">0.00</span></p>
+        <p>Savings Goal: ₹ <span id="profile-goal">0.00</span></p>
+        <button onclick="logout()" class="logout-btn">Logout</button>
     </div>
 
-    <h2>Expenses Summary:</h2>
-    <table id="expense-table">
-      <thead>
-        <tr>
-          <th>Title</th>
-          <th>Amount</th>
-          <th>Category</th>
-          <th>Date</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <div class="form">
+        <h2>Add Expense</h2>
+        <input type="text" id="expense-title" placeholder="Expense title">
+        <input type="number" id="expense-amount" placeholder="Amount">
+        <select id="expense-category">
+            <option value="Food">Food</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Travel">Travel</option>
+            <option value="Health">Health</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Bills">Bills</option>
+            <option value="Others">Others</option>
+        </select>
+        <input type="text" id="custom-category" placeholder="Enter custom category" style="display:none;">
+        <label>Date:</label>
+        <input type="date" id="expense-date">
+        <label>Time:</label>
+        <input type="time" id="expense-time">
 
-    <h2>Category Chart:</h2>
-    <select id="category-chart-select" onchange="updateCategoryChartType(this.value)">
-      <option value="bar">Bar</option>
-      <option value="pie">Pie</option>
-      <option value="doughnut">Doughnut</option>
-    </select>
-    <canvas id="categoryChart" style="width:100%; height:300px;"></canvas>
+        <div class="icon-buttons">
+            <button onclick="addExpense()">Add Expense</button>
+            <button onclick="downloadCSV()">Export CSV</button>
+            <button onclick="downloadPDF()">Export PDF</button>
+            <button onclick="resetExpenses()">Reset All</button>
+        </div>
+    </div>
 
-    <h2>Spending Trends:</h2>
-    <select id="trend-period-select" onchange="renderTrendChart()">
-      <option value="daily">Daily</option>
-      <option value="monthly">Monthly</option>
-      <option value="yearly">Yearly</option>
-    </select>
-    <canvas id="trendChart" style="width:100%; height:300px;"></canvas>
-  </div>
+    <div class="dashboard">
+        <h2>Total Spent: ₹ <span id="total-spent">0</span></h2>
+
+        <h2>Set Savings Goal:</h2>
+        <input type="number" id="savings-goal" placeholder="Enter goal amount">
+        <button id="set-goal-btn">Set Goal</button>
+        <p id="goal-msg"></p>
+        <p id="goal-remaining"></p>
+        <div class="goal-progress-container">
+            <div id="goal-progress-bar"></div>
+        </div>
+
+        <h2>Expenses Summary:</h2>
+        <table id="expense-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Amount</th>
+                    <th>Category</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <h2>Category Chart:</h2>
+        <select id="category-chart-select" onchange="updateCategoryChartType(this.value)">
+            <option value="bar">Bar</option>
+            <option value="pie">Pie</option>
+            <option value="doughnut">Doughnut</option>
+        </select>
+        <canvas id="categoryChart"></canvas>
+
+        <h2>Spending Trends:</h2>
+        <select id="trend-period-select" onchange="renderTrendChart()">
+            <option value="daily">Daily</option>
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+        </select>
+        <canvas id="trendChart"></canvas>
+    </div>
 </div>
 
 <script src="app.js"></script>
