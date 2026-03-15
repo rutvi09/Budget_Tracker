@@ -25,14 +25,14 @@ h1, h2 {
     color: #333;
 }
 
-/* Hookline style for screen display */
+/* Hookline style in black */
 h4 {
     text-align: center;
     font-weight: 400;
     font-style: italic;
     margin-bottom: 20px;
-    font-size: 1.1rem;
-    color: #FF6F00; /* Solid dark orange for good screen visibility */
+    font-size: 1.2rem;
+    color: #000; /* Black color for clean screen display */
 }
 
 input, select, button {
